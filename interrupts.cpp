@@ -24,60 +24,71 @@ int main(int argc, char **argv) {
   std::string execution; //!< string to accumulate the execution output
 
   /******************ADD YOUR VARIABLES HERE*************************/
+  // tracks amount of time spent doing various actions
   int clock = 0;
 
+  // variable used to help calculate remaining time for IO devices.
+  int isr_total_delays = 0;
+
+  auto simcycles = [&](int duration, const std::string &action, bool incr_isr_total_delays = false) {
+    // log -> current clock, duration of interrupt, action performed
+    execution += std::to_string(clock) + ", " + std::to_string(duration) + ", " + action + "\n";
+
+    // add duration of interrupt to current clock
+    clock += duration;
+
+    if (incr_isr_total_delays) {
+      isr_total_delays++;
+    }
+  };
   /******************************************************************/
 
   // parse each line of the input trace file
   while (std::getline(input_file, trace)) {
     auto [activity, duration_intr] = parse_trace(trace);
-    int isr_total_delays = 0;
+
+    // reset isr_total_delays each time there is a new action
+    isr_total_delays = 0;
     /******************ADD YOUR SIMULATION CODE HERE*************************/
 
     // CPU simulation
     if (activity == "CPU") {
-      execution += std::to_string(clock) + ", " + std::to_string(duration_intr) + ", CPU Burst\n";
-      clock += duration_intr;
+
+      simcycles(duration_intr, "CPU Burst");
 
       // System call Simulation
     } else {
 
+      // Interrupt routine
       auto [executiontemp, tempclock] = intr_boilerplate(clock, duration_intr, CONTEXT_SAVE_TIME, vectors);
       execution += executiontemp;
       clock = tempclock;
 
       if (activity == "SYSCALL") {
         // Run the ISR
-        execution += std::to_string(clock) + ", " + std::to_string(ISR_DELAY) + ", SYSCALL: run the ISR (device driver)\n";
-        clock += ISR_DELAY;
-        isr_total_delays++;
+        simcycles(ISR_DELAY, "SYSCALL: run the ISR (device driver)", true);
+
         // transfer data from device to memory
-        execution += std::to_string(clock) + ", " + std::to_string(ISR_DELAY) + ", transfer data from device to memory\n";
-        clock += ISR_DELAY;
-        isr_total_delays++;
+        simcycles(ISR_DELAY, "transfer data from device to memory", true);
 
         if (delays[duration_intr] - (ISR_DELAY * isr_total_delays) > 0) {
-          execution += std::to_string(clock) + ", " + std::to_string(delays[duration_intr] - (ISR_DELAY * isr_total_delays)) + ", Remaining ISR tasks\n";
-          clock += delays[duration_intr] - (ISR_DELAY * isr_total_delays);
+          simcycles(delays[duration_intr] - (ISR_DELAY * isr_total_delays), "Remaining ISR tasks");
         }
 
-        execution += std::to_string(clock) + ", " + std::to_string(1) + ", IRET\n";
-        clock++;
+        // Return to user mode after interrupt
+        simcycles(1, "IRET");
 
         // END_IO Simulation
       } else if (activity == "END_IO") {
 
-        execution += std::to_string(clock) + ", " + std::to_string(ISR_DELAY) + ", ENDIO: run the ISR(device driver)\n";
-        clock += ISR_DELAY;
-        isr_total_delays++;
+        simcycles(ISR_DELAY, "END_IO: run the ISR(device driver)", true);
 
         if (delays[duration_intr] - (ISR_DELAY * isr_total_delays) > 0) {
-          execution += std::to_string(clock) + ", " + std::to_string(delays[duration_intr] - (ISR_DELAY * isr_total_delays)) + ", check device status\n";
-          clock += delays[duration_intr] - (ISR_DELAY * isr_total_delays);
+          simcycles(delays[duration_intr] - (ISR_DELAY * isr_total_delays), "check device status");
         }
 
-        execution += std::to_string(clock) + ", " + std::to_string(1) + ", IRET\n";
-        clock++;
+        // Return to user mode after interrupt
+        simcycles(1, "IRET");
       }
     }
     /************************************************************************/
