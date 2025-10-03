@@ -118,7 +118,7 @@ std::pair<std::string, int> intr_boilerplate(int current_time, int intr_num, int
   execution += std::to_string(current_time) + ", " + std::to_string(1) + ", find vector " + std::to_string(intr_num) + " in memory position " + vector_address + "\n";
   current_time++;
 
-  execution += std::to_string(current_time) + ", " + std::to_string(1) + ", load address " + vectors.at(intr_num - 1) + " into the PC\n";
+  execution += std::to_string(current_time) + ", " + std::to_string(1) + ", load address " + vectors.at(intr_num) + " into the PC\n";
   current_time++;
 
   return std::make_pair(execution, current_time);
