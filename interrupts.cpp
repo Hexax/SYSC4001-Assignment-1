@@ -11,6 +11,7 @@
 using namespace std;
 
 #define ISR_DELAY 40
+#define CONTEXT_SAVE_TIME 10
 
 int main(int argc, char **argv) {
   // vectors is a C++ std::vector of strings that contain the address of the ISR
@@ -39,45 +40,45 @@ int main(int argc, char **argv) {
       clock += duration_intr;
 
       // System call Simulation
-    } else if (activity == "SYSCALL") {
-      auto [executiontemp, tempclock] = intr_boilerplate(clock, duration_intr, 10, vectors);
+    } else {
+
+      auto [executiontemp, tempclock] = intr_boilerplate(clock, duration_intr, CONTEXT_SAVE_TIME, vectors);
       execution += executiontemp;
       clock = tempclock;
 
-      // Run the ISR
-      execution += std::to_string(clock) + ", " + std::to_string(ISR_DELAY) + ", SYSCALL: run the ISR (device driver)\n";
-      clock += ISR_DELAY;
-      isr_total_delays++;
-      // transfer data from device to memory
-      execution += std::to_string(clock) + ", " + std::to_string(ISR_DELAY) + ", transfer data from device to memory\n";
-      clock += ISR_DELAY;
-      isr_total_delays++;
+      if (activity == "SYSCALL") {
+        // Run the ISR
+        execution += std::to_string(clock) + ", " + std::to_string(ISR_DELAY) + ", SYSCALL: run the ISR (device driver)\n";
+        clock += ISR_DELAY;
+        isr_total_delays++;
+        // transfer data from device to memory
+        execution += std::to_string(clock) + ", " + std::to_string(ISR_DELAY) + ", transfer data from device to memory\n";
+        clock += ISR_DELAY;
+        isr_total_delays++;
 
-      if (delays[duration_intr] - (ISR_DELAY * isr_total_delays) > 0) {
-        execution += std::to_string(clock) + ", " + std::to_string(delays[duration_intr] - (ISR_DELAY * isr_total_delays)) + ", Remaining ISR tasks\n";
-        clock += delays[duration_intr] - (ISR_DELAY * isr_total_delays);
+        if (delays[duration_intr] - (ISR_DELAY * isr_total_delays) > 0) {
+          execution += std::to_string(clock) + ", " + std::to_string(delays[duration_intr] - (ISR_DELAY * isr_total_delays)) + ", Remaining ISR tasks\n";
+          clock += delays[duration_intr] - (ISR_DELAY * isr_total_delays);
+        }
+
+        execution += std::to_string(clock) + ", " + std::to_string(1) + ", IRET\n";
+        clock++;
+
+        // END_IO Simulation
+      } else if (activity == "END_IO") {
+
+        execution += std::to_string(clock) + ", " + std::to_string(ISR_DELAY) + ", ENDIO: run the ISR(device driver)\n";
+        clock += ISR_DELAY;
+        isr_total_delays++;
+
+        if (delays[duration_intr] - (ISR_DELAY * isr_total_delays) > 0) {
+          execution += std::to_string(clock) + ", " + std::to_string(delays[duration_intr] - (ISR_DELAY * isr_total_delays)) + ", check device status\n";
+          clock += delays[duration_intr] - (ISR_DELAY * isr_total_delays);
+        }
+
+        execution += std::to_string(clock) + ", " + std::to_string(1) + ", IRET\n";
+        clock++;
       }
-
-      execution += std::to_string(clock) + ", " + std::to_string(1) + ", IRET\n";
-      clock++;
-
-      // END_IO Simulation
-    } else if (activity == "END_IO") {
-      auto [executiontemp, tempclock] = intr_boilerplate(clock, duration_intr, 10, vectors);
-      execution += executiontemp;
-      clock = tempclock;
-
-      execution += std::to_string(clock) + ", " + std::to_string(ISR_DELAY) + ", ENDIO: run the ISR(device driver)\n";
-      clock += ISR_DELAY;
-      isr_total_delays++;
-
-      if (delays[duration_intr] - (ISR_DELAY * isr_total_delays) > 0) {
-        execution += std::to_string(clock) + ", " + std::to_string(delays[duration_intr] - (ISR_DELAY * isr_total_delays)) + ", check device status\n";
-        clock += delays[duration_intr] - (ISR_DELAY * isr_total_delays);
-      }
-
-      execution += std::to_string(clock) + ", " + std::to_string(1) + ", IRET\n";
-      clock++;
     }
     /************************************************************************/
   }
