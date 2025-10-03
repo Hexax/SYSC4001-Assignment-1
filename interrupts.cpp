@@ -3,6 +3,7 @@
  * @file interrupts.cpp
  * @author Sasisekhar Govind
  *
+ * Modified by Mickael Roy and Prunellie Tchakam
  */
 
 #include "interrupts.hpp"
@@ -55,41 +56,45 @@ int main(int argc, char **argv) {
     if (activity == "CPU") {
 
       simcycles(duration_intr, "CPU Burst");
+      continue;
+    }
 
-      // System call Simulation
-    } else {
+    // Interrupt routine
+    auto [executiontemp, tempclock] = intr_boilerplate(clock, duration_intr, CONTEXT_SAVE_TIME, vectors);
+    execution += executiontemp;
+    clock = tempclock;
 
-      // Interrupt routine
-      auto [executiontemp, tempclock] = intr_boilerplate(clock, duration_intr, CONTEXT_SAVE_TIME, vectors);
-      execution += executiontemp;
-      clock = tempclock;
+    if (duration_intr < 0 || duration_intr >= static_cast<int>(delays.size())) {
+      simcycles(1, "ERROR: invalid device id " + std::to_string(duration_intr));
+      simcycles(1, "IRET");
+      continue;
+    }
 
-      if (activity == "SYSCALL") {
-        // Run the ISR
-        simcycles(ISR_DELAY, "SYSCALL: run the ISR (device driver)", true);
+    if (activity == "SYSCALL") {
+      // Run the ISR
+      simcycles(ISR_DELAY, "SYSCALL: run the ISR (device driver)", true);
 
-        // transfer data from device to memory
-        simcycles(ISR_DELAY, "transfer data from device to memory", true);
+      // transfer data from device to memory
+      simcycles(ISR_DELAY, "transfer data from device to memory", true);
 
-        if (delays[duration_intr] - (ISR_DELAY * isr_total_delays) > 0) {
-          simcycles(delays[duration_intr] - (ISR_DELAY * isr_total_delays), "Remaining ISR tasks");
-        }
-
-        // Return to user mode after interrupt
-        simcycles(1, "IRET");
-
-        // END_IO Simulation
-      } else if (activity == "END_IO") {
-
-        simcycles(ISR_DELAY, "END_IO: run the ISR(device driver)", true);
-
-        if (delays[duration_intr] - (ISR_DELAY * isr_total_delays) > 0) {
-          simcycles(delays[duration_intr] - (ISR_DELAY * isr_total_delays), "check device status");
-        }
-
-        // Return to user mode after interrupt
-        simcycles(1, "IRET");
+      if (delays[duration_intr] - (ISR_DELAY * isr_total_delays) > 0) {
+        simcycles(delays[duration_intr] - (ISR_DELAY * isr_total_delays), "Remaining ISR tasks");
       }
+
+      // Return to user mode after interrupt
+      simcycles(1, "IRET");
+
+      // END_IO Simulation
+    } else if (activity == "END_IO") {
+
+      simcycles(ISR_DELAY, "END_IO: run the ISR(device driver)", true);
+
+      if (delays[duration_intr] - (ISR_DELAY * isr_total_delays) > 0) {
+        simcycles(delays[duration_intr] - (ISR_DELAY * isr_total_delays), "check device status");
+      }
+
+      // Return to user mode after interrupt
+      simcycles(1, "IRET");
     }
     /************************************************************************/
   }
