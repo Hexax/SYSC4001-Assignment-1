@@ -12,7 +12,7 @@
 using namespace std;
 
 #define ISR_DELAY 40
-#define CONTEXT_SAVE_TIME 10
+#define CONTEXT_SAVE_TIME 30
 
 int main(int argc, char **argv) {
   // vectors is a C++ std::vector of strings that contain the address of the ISR
