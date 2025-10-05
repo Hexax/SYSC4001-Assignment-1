@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
       // END_IO Simulation
     } else if (activity == "END_IO") {
 
-      simcycles(ISR_DELAY, "END_IO: run the ISR(device driver)", true);
+      simcycles(ISR_DELAY, "END_IO: Store information in memory", true);
 
       if (delays[duration_intr] - (ISR_DELAY * isr_total_delays) > 0) {
         simcycles(delays[duration_intr] - (ISR_DELAY * isr_total_delays), "check device status");
@@ -98,6 +98,10 @@ int main(int argc, char **argv) {
     }
     /************************************************************************/
   }
+
+  // simulate CPU speeds and log results at end of output file
+  double totaltime = static_cast<double>(clock) / CPU_SPEED;
+  execution += "Total time taken to execute trace file: " + std::to_string(totaltime) + " seconds";
 
   input_file.close();
 
