@@ -1,0 +1,50 @@
+Total time taken to execute trace file: 15.660000 seconds
+0, 10, CPU Burst
+10, 1, switch to kernel mode
+11, 10, context saved
+21, 1, find vector 4 in memory position 0x0008
+22, 1, load address 0X0292 into the PC
+23, 40, SYSCALL: run the ISR (device driver)
+63, 40, transfer data from device to memory
+103, 170, Remaining ISR tasks
+273, 1, IRET
+274, 1, switch to kernel mode
+275, 10, context saved
+285, 1, find vector 4 in memory position 0x0008
+286, 1, load address 0X0292 into the PC
+287, 40, END_IO: Store information in memory
+327, 210, check device status
+537, 1, IRET
+538, 10, CPU Burst
+548, 1, switch to kernel mode
+549, 10, context saved
+559, 1, find vector 5 in memory position 0x000A
+560, 1, load address 0X048B into the PC
+561, 40, SYSCALL: run the ISR (device driver)
+601, 40, transfer data from device to memory
+641, 131, Remaining ISR tasks
+772, 1, IRET
+773, 1, switch to kernel mode
+774, 10, context saved
+784, 1, find vector 5 in memory position 0x000A
+785, 1, load address 0X048B into the PC
+786, 40, END_IO: Store information in memory
+826, 171, check device status
+997, 1, IRET
+998, 10, CPU Burst
+1008, 1, switch to kernel mode
+1009, 10, context saved
+1019, 1, find vector 6 in memory position 0x000C
+1020, 1, load address 0X0639 into the PC
+1021, 40, SYSCALL: run the ISR (device driver)
+1061, 40, transfer data from device to memory
+1101, 185, Remaining ISR tasks
+1286, 1, IRET
+1287, 1, switch to kernel mode
+1288, 10, context saved
+1298, 1, find vector 6 in memory position 0x000C
+1299, 1, load address 0X0639 into the PC
+1300, 40, END_IO: Store information in memory
+1340, 225, check device status
+1565, 1, IRET
+1566, NULL, NO MORE INSTRUCTIONS CPU SLEEP

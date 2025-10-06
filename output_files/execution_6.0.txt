@@ -1,0 +1,5 @@
+Total time taken to execute trace file: 12.000000 seconds
+0, 500, CPU Burst
+500, 400, CPU Burst
+900, 300, CPU Burst
+1200, NULL, NO MORE INSTRUCTIONS CPU SLEEP
